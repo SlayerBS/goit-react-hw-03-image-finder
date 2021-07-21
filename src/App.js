@@ -1,8 +1,10 @@
-import React, {Component} from 'react';
-import SearchBar from './components/Searchbar';
-import axios from 'axios';
-import ImageGallery from './components/ImageGallery';
-import Button from './components/Button';
+import React, { Component } from "react";
+import SearchBar from "./components/Searchbar";
+import axios from "axios";
+import ImageGallery from "./components/ImageGallery";
+import Button from "./components/Button";
+import { getImagesByQuery } from "./api/api";
+import LoaderSpiner from "./components/Loader/Loader";
 
 export default class App extends Component {
   state = {
@@ -11,64 +13,62 @@ export default class App extends Component {
     page: 1,
     showModal: false,
     isLoading: false,
-    largeImageURL:''
-  }
+    largeImageURL: "",
+    error: null,
+  };
 
-   componentDidUpdate(prevProps, prevState) {
-     const prevQuery = prevState.searchQuery;
-     const nextQuery = this.state.searchQuery;
+  componentDidUpdate(prevProps, prevState) {
+    const prevQuery = prevState.searchQuery;
+    const nextQuery = this.state.searchQuery;
     if (prevQuery !== nextQuery) {
       this.getImages();
     }
   }
 
-  onSubmit=(searchQuery) =>this.setState({ images: [], searchQuery: searchQuery, page: 1 });
-   
+  onSubmit = (searchQuery) =>
+    this.setState({ images: [], searchQuery: searchQuery, page: 1 });
+
   getImages = () => {
-  
-  const { searchQuery, page } = this.state;
-  this.setState({ isLoading: true });
-  const API_KEY = '4423902-dbd0f970c0cc60dbb84d66d4b';
-  axios.defaults.baseURL = 'https://pixabay.com/api/';
-  
-    axios
-      .get(`?image_type=photo&orientation=horizontal&q=${searchQuery}&page=${page}&per_page=12&key=${API_KEY}`)
-      .then(res => res.data.hits)
-      .then(images => this.setState(prevState => ({
-        images: [...prevState.images, ...images],
-        page: prevState.page + 1,
-      }))).catch(error => this.setState({ error }))
+    const { searchQuery, page } = this.state;
+    this.setState({ isLoading: true });
+
+    getImagesByQuery(searchQuery, page)
+      .then((images) =>
+        this.setState((prevState) => ({
+          images: [...prevState.images, ...images],
+          page: prevState.page + 1,
+        }))
+      )
+      .catch((error) => this.setState({ error }))
       .finally(() => {
-         this.scrollDown();
+        this.scrollDown();
         this.setState({ isLoading: false });
       });
-    
-  
-    
   };
-  
+
   scrollDown = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
-      behavior: 'smooth',
+      behavior: "smooth",
     });
-    
-  }
-  render() {
-    const { images, isLoading, showModal, largeImageURL } = this.state;
-      return (
-      <>
-        <SearchBar onSubmit={this.onSubmit} />
-          {this.state.images && <div>
-            <ImageGallery images={images }/>
-          </div>}
-          {images.length&&
-          (<Button onClick={this.getImages}/>)}
+  };
 
-   </>
+  render() {
+    const { images, isLoading, showModal, largeImageURL, error } = this.state;
+    const isLastPage = images.length % 12; //работает только в случае если не кратно 12(
+    return (
+      <>
+        {error && <p>{error.message}</p>}
+        <SearchBar onSubmit={this.onSubmit} />
+
+        {images && (
+          <div>
+            <ImageGallery images={images} />
+          </div>
+        )}
+        {isLoading && <LoaderSpiner />}
+        {!isLastPage && images.length && <Button onClick={this.getImages} />}
+      </>
     );
   }
-  
 }
-
-
