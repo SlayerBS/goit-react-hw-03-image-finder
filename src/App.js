@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import SearchBar from "./components/Searchbar";
-import axios from "axios";
 import ImageGallery from "./components/ImageGallery";
 import Button from "./components/Button";
 import { getImagesByQuery } from "./api/api";
 import LoaderSpiner from "./components/Loader/Loader";
+import Modal from "./components/Modal";
 
 export default class App extends Component {
   state = {
@@ -53,6 +53,9 @@ export default class App extends Component {
     });
   };
 
+  toggleModal = () =>
+    this.setState(({ showModal }) => ({ showModal: !showModal }));
+
   render() {
     const { images, isLoading, showModal, largeImageURL, error } = this.state;
     const isLastPage = images.length % 12; //работает только в случае если не кратно 12(
@@ -68,6 +71,11 @@ export default class App extends Component {
         )}
         {isLoading && <LoaderSpiner />}
         {!isLastPage && images.length && <Button onClick={this.getImages} />}
+        {showModal && (
+          <Modal>
+            <img src={largeImageURL} alt="" />
+          </Modal>
+        )}
       </>
     );
   }
