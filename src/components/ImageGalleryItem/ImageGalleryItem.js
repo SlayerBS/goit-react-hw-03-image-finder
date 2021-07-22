@@ -1,12 +1,15 @@
-import { v4 as uuidv4 } from "uuid";
-import styles from './ImageGalleryItem.module.css'
+import styles from "./ImageGalleryItem.module.css";
 
-const ImageGalleryItem = ({key, imageSrc}) => {
-    return (
-        <li className={styles.ImageGalleryItem} key={key}>
-            <img src={imageSrc} alt="" className={styles["ImageGalleryItem-image"]} />
-</li>
-    )
-    
-}
+const ImageGalleryItem = ({ imageSrc, openModalImage }) => {
+  return (
+    <li className={styles.ImageGalleryItem}>
+      <img
+        src={imageSrc}
+        alt=""
+        className={styles["ImageGalleryItem-image"]}
+        onClick={openModalImage}
+      />
+    </li>
+  );
+};
 export default ImageGalleryItem;

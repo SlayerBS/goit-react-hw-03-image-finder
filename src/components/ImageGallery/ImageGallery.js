@@ -1,17 +1,21 @@
-import ImageGalleryItem from '../ImageGalleryItem'
+import ImageGalleryItem from "../ImageGalleryItem";
 
-import styles from './ImageGallery.module.css'
+import styles from "./ImageGallery.module.css";
 
-const ImageGallery = ({images}) =>
-{
-           return (
-            <ul className={styles.ImageGallery}>
-  
-                {images.map((image) => (<ImageGalleryItem key={image.id} imageSrc={image.webformatURL} />))
-               
-                }
-            </ul>
-        )
-   
-    }
+const ImageGallery = ({ images, modalImage }) => {
+  return (
+    <ul className={styles.ImageGallery}>
+      {images.map(({ id, webformatURL, largeImageURL }) => {
+        const openModalImage = () => modalImage(largeImageURL);
+        return (
+          <ImageGalleryItem
+            key={id}
+            imageSrc={webformatURL}
+            openModalImage={openModalImage}
+          />
+        );
+      })}
+    </ul>
+  );
+};
 export default ImageGallery;

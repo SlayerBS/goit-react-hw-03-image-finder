@@ -3,8 +3,10 @@ import SearchBar from "./components/Searchbar";
 import ImageGallery from "./components/ImageGallery";
 import Button from "./components/Button";
 import { getImagesByQuery } from "./api/api";
-import LoaderSpiner from "./components/Loader/Loader";
+import LoaderSpiner from "./components/Loader";
 import Modal from "./components/Modal";
+
+import styles from "./App.module.css";
 
 export default class App extends Component {
   state = {
@@ -15,6 +17,7 @@ export default class App extends Component {
     isLoading: false,
     largeImageURL: "",
     error: null,
+    showButton: false,
   };
 
   componentDidUpdate(prevProps, prevState) {
@@ -23,22 +26,42 @@ export default class App extends Component {
     if (prevQuery !== nextQuery) {
       this.getImages();
     }
+
+    if (this.state.images.length - prevState.images.length === 12) {
+      this.setState({ showButton: true });
+    }
   }
 
   onSubmit = (searchQuery) =>
-    this.setState({ images: [], searchQuery: searchQuery, page: 1 });
+    this.setState({
+      images: [],
+      searchQuery: searchQuery,
+      page: 1,
+      error: null,
+      showButton: false,
+    });
 
   getImages = () => {
     const { searchQuery, page } = this.state;
     this.setState({ isLoading: true });
 
     getImagesByQuery(searchQuery, page)
-      .then((images) =>
+      .then((images) => {
+        if (images.length === 0) {
+          this.setState({ showButton: false });
+          this.setState({
+            error: `Search result by "${searchQuery}' not successful. Enter the correct query.`,
+          });
+          return;
+        } else if (images.length !== 12) {
+          this.setState({ showButton: false });
+        }
         this.setState((prevState) => ({
           images: [...prevState.images, ...images],
           page: prevState.page + 1,
-        }))
-      )
+        }));
+      })
+
       .catch((error) => this.setState({ error }))
       .finally(() => {
         this.scrollDown();
@@ -56,27 +79,31 @@ export default class App extends Component {
   toggleModal = () =>
     this.setState(({ showModal }) => ({ showModal: !showModal }));
 
-  render() {
-    const { images, isLoading, showModal, largeImageURL, error } = this.state;
-    const isLastPage = images.length % 12; //работает только в случае если не кратно 12(
-    return (
-      <>
-        {error && <p>{error.message}</p>}
-        <SearchBar onSubmit={this.onSubmit} />
+  modalImage = (largeImageURL) => {
+    this.setState({ largeImageURL });
+    this.toggleModal();
+  };
 
+  render() {
+    const { images, isLoading, showModal, largeImageURL, error, showButton } =
+      this.state;
+    return (
+      <div className={styles.App}>
+        <SearchBar onSubmit={this.onSubmit} />
+        {error && <p className={styles.Error}>{error}</p>}
         {images && (
           <div>
-            <ImageGallery images={images} />
+            <ImageGallery images={images} modalImage={this.modalImage} />
           </div>
         )}
         {isLoading && <LoaderSpiner />}
-        {!isLastPage && images.length && <Button onClick={this.getImages} />}
+        {showButton && !isLoading && <Button onClick={this.getImages} />}
         {showModal && (
-          <Modal>
+          <Modal onClose={this.toggleModal}>
             <img src={largeImageURL} alt="" />
           </Modal>
         )}
-      </>
+      </div>
     );
   }
 }
