@@ -5,6 +5,8 @@ import Button from "./components/Button";
 import { getImagesByQuery } from "./api/api";
 import LoaderSpiner from "./components/Loader";
 import Modal from "./components/Modal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 import styles from "./App.module.css";
 
@@ -16,7 +18,6 @@ export default class App extends Component {
     showModal: false,
     isLoading: false,
     largeImageURL: "",
-    error: null,
     showButton: false,
   };
 
@@ -49,11 +50,13 @@ export default class App extends Component {
       .then((images) => {
         if (images.length === 0) {
           this.setState({ showButton: false });
-          this.setState({
-            error: `Search result by "${searchQuery}' not successful. Enter the correct query.`,
-          });
+          toast.error(
+            `Search result by "${searchQuery}' not successful. Enter the correct query.`
+          );
+
           return;
         } else if (images.length !== 12) {
+          toast("Фото закончились");
           this.setState({ showButton: false });
         }
         this.setState((prevState) => ({
@@ -62,7 +65,7 @@ export default class App extends Component {
         }));
       })
 
-      .catch((error) => this.setState({ error }))
+      .catch((error) => toast(error))
       .finally(() => {
         this.scrollDown();
         this.setState({ isLoading: false });
@@ -89,6 +92,7 @@ export default class App extends Component {
       this.state;
     return (
       <div className={styles.App}>
+        <ToastContainer autoClose={3000} position="top-left" />
         <SearchBar onSubmit={this.onSubmit} />
         {error && <p className={styles.Error}>{error}</p>}
         {images && (
