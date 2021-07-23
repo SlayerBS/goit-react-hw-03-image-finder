@@ -1,4 +1,6 @@
 import axios from "axios";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 axios.defaults.baseURL = "https://pixabay.com/api";
 axios.defaults.params = {
@@ -9,9 +11,13 @@ axios.defaults.params = {
 };
 
 async function getImagesByQuery(searchQuery, page) {
-  const { data } = await axios.get("", {
-    params: { q: searchQuery, page },
-  });
+  const { data } = await axios
+    .get("", {
+      params: { q: searchQuery, page },
+    })
+    .catch(function (error) {
+      toast.error(error);
+    });
   return data.hits;
 }
 
