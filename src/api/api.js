@@ -18,6 +18,7 @@ async function getImagesByQuery(searchQuery, page) {
     .catch(function (error) {
       toast.error(error);
     });
+  console.log(data.hits);
   return data.hits;
 }
 

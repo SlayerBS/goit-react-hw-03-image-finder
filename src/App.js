@@ -53,7 +53,6 @@ export default class App extends Component {
           toast.error(
             `Search result by "${searchQuery}' not successful. Enter the correct query.`
           );
-
           return;
         } else if (images.length !== 12) {
           toast("Фото закончились");
@@ -64,7 +63,6 @@ export default class App extends Component {
           page: prevState.page + 1,
         }));
       })
-
       .catch((error) => toast(error))
       .finally(() => {
         this.scrollDown();
